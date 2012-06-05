@@ -3,7 +3,7 @@ module dgs.util;
 import std.conv;
 import std.traits;
 import derelict.devil.il;
-import derelict.opengl.gl;
+import org.opengl.gl;
 
 package:
 

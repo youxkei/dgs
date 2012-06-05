@@ -3,11 +3,11 @@ module dgs.Window;
 import dgs.all;
 import dgs.Input;
 import dgs.util;
-import derelict.sdl.sdl;
-import derelict.sdl.mixer;
-import derelict.sdl.ttf;
+import derelict.sdl2.sdl;
+//import derelict.sdl2.mixer;
+import derelict.sdl2.ttf;
 import derelict.devil.il;
-import derelict.opengl.gl;
+import org.opengl.gl;
 
 import std.conv;
 import std.exception;
@@ -16,19 +16,15 @@ import std.stdio;
 import std.string;
 import std.typecons;
 
-void openWindow(int awidth, int aheight, bool avsync = true)in{
+void openWindow(int width, int height)in{
     assert(initialized);
 }body{
-	assert(!SDL_GL_SetAttribute(SDL_GL_DOUBLEBUFFER, true));
-	assert(!SDL_GL_SetAttribute(SDL_GL_SWAP_CONTROL, avsync));
+	enforce(!SDL_GL_SetAttribute(SDL_GL_DOUBLEBUFFER, true));
 
-	assert(SDL_SetVideoMode(awidth, aheight, 32, SDL_OPENGL | SDL_RESIZABLE));
+    window = enforce(SDL_CreateWindow("Caption", SDL_WINDOWPOS_CENTERED, SDL_WINDOWPOS_CENTERED, width, height, SDL_WINDOW_OPENGL | SDL_WINDOW_SHOWN));
+    context = enforce(SDL_GL_CreateContext(window));
 
-	int lvsyncCheck;
-	SDL_GL_GetAttribute(SDL_GL_SWAP_CONTROL, &lvsyncCheck);
-	writeln("vsync: ", lvsyncCheck == 1);
-
-	glCheck!glOrtho(0.0, awidth, aheight, 0.0, -1.0, 1.0);
+	glCheck!glOrtho(0.0, width, height, 0.0, -1.0, 1.0);
 	glCheck!glClearColor( 0.0, 0.0, 0.0, 1.0 );
 	glCheck!glEnable(GL_TEXTURE_2D);
 	glCheck!glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
@@ -36,10 +32,10 @@ void openWindow(int awidth, int aheight, bool avsync = true)in{
 	glCheck!glDisable(GL_DEPTH_TEST);
 
 	glCheck!glClear(GL_COLOR_BUFFER_BIT);
-	SDL_GL_SwapBuffers();
+    SDL_GL_SwapWindow(window);
 
     initInput();
-	pwindowOpened = true;
+	windowOpened = true;
 }
 
 void processEvents(){
@@ -58,8 +54,8 @@ void processEvents(){
 			case SDL_MOUSEMOTION:
                 processInputEvent(levent);
                 break;
-            case SDL_ACTIVEEVENT:
-                if(!levent.active.gain && levent.active.state & (SDL_APPINPUTFOCUS | SDL_APPACTIVE)){
+            case SDL_WINDOWEVENT:
+                if(levent.window.event == SDL_WINDOWEVENT_FOCUS_LOST){
                     clearKeyStates();
                 }
                 break;
@@ -75,16 +71,15 @@ void clearWindow(){
 }
 
 void updateWindow(){
-	SDL_GL_SwapBuffers();
+    SDL_GL_SwapWindow(window);
 }
 
 void setWindowTitle(string aname){
-    SDL_WM_SetCaption(aname.toStringz, null);
+    //SDL_WM_SetCaption(aname.toStringz, null);
 }
 
 package:
 
+SDL_Window* window;
+SDL_GLContext context;
 bool windowOpened;
-
-private:
-alias windowOpened pwindowOpened;

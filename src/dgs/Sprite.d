@@ -3,7 +3,7 @@ module dgs.Sprite;
 import std.math;
 import std.traits;
 import std.typecons;
-import derelict.opengl.gl;
+import org.opengl.gl;
 import dgs.Image;
 import dgs.Rect;
 import dgs.util;
@@ -81,7 +81,7 @@ mixin(defBoth!(__LINE__)("Sprite", q{
         }
 
         template field(fields...){
-            static assert(staticLength!fields > 0);
+            static assert(fields.length > 0);
             static assert(check!fields);
 
             typeof(this) set(getTuple!fields.Types args){
@@ -128,8 +128,8 @@ mixin(defBoth!(__LINE__)("Sprite", q{
         Image pimage;
 
         template check(fields...){
-            static assert(staticLength!fields > 0);
-            static if(staticLength!fields == 1){
+            static assert(fields.length > 0);
+            static if(fields.length == 1){
                 enum check = hasMember!(typeof(this), fields[0]);
             }else{
                 enum check = hasMember!(typeof(this), fields[0]) && check!(fields[1..$]);
@@ -137,8 +137,8 @@ mixin(defBoth!(__LINE__)("Sprite", q{
         }
 
         template getTuple(fields...){
-            static assert(staticLength!fields > 0);
-            static if(staticLength!fields == 1){
+            static assert(fields.length > 0);
+            static if(fields.length == 1){
                 alias Tuple!(typeof(mixin(fields[0]))) getTuple;
             }else{
                 alias Tuple!(typeof(mixin(fields[0])), getTuple!(fields[1..$]).Types) getTuple;

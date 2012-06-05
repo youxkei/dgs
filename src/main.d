@@ -9,7 +9,7 @@ void main(){
     scope(exit) destroyDgs();
 	mouseAliases[BUTTON_LEFT] = KEY_z;
 	setWindowTitle("dgs test");
-	openWindow(640, 480, true);
+	openWindow(640, 480);
 	auto sp = (new Sprite).field!("image", "centerX", "centerY").set(new Image("ms.png"), 128, 128);
 	auto sp2 = (new Sprite).field!"image".set(new Image("テキスト描写成功!!", 64));
 	while(true){

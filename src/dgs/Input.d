@@ -2,7 +2,7 @@ module dgs.Input;
 
 import std.algorithm;
 import std.exception;
-import derelict.sdl.sdl;
+import derelict.sdl2.sdl;
 
 uint[32] joyAliases;
 uint[8] mouseAliases;
@@ -306,10 +306,10 @@ void initInput(){
 	prepeateDelay = 10;
 	prepeateInterval = 4;
 	pthreshold = 300;
-	for(size_t li; li < min(SDL_NumJoysticks(), 4); li++){
+	for(int li; li < min(SDL_NumJoysticks(), 4); li++){
 		SDL_JoystickOpen(li);
 	}
-	pSDLKeyStates = SDL_GetKeyState(null);
+	pSDLKeyStates = SDL_GetKeyboardState(null);
 }
 
 void updateKeyRepeat(){

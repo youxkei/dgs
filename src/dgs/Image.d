@@ -2,9 +2,9 @@ module dgs.Image;
 
 import core.bitop;
 import derelict.devil.il;
-import derelict.opengl.gl;
-import derelict.sdl.sdl;
-import derelict.sdl.ttf;
+import org.opengl.gl;
+import derelict.sdl2.sdl;
+import derelict.sdl2.ttf;
 import dgs.all;
 import dgs.Rect;
 import dgs.Window;
@@ -19,21 +19,21 @@ final class Image{
         invariant(){
         }
 
-        this(in string afile)in{
+        this(in string file)in{
             assert(initialized);
-            assert(afile);
+            assert(file);
         }body{
-            uint aimage = 0;
-            ilCheck!ilGenImages(1, &aimage);
-            scope(exit) ilCheck!ilDeleteImages(1, &aimage);
-            ilCheck!ilBindImage(aimage);
-            ilCheck!ilLoadImage(afile.toStringz());
+            uint image = 0;
+            ilCheck!ilGenImages(1, &image);
+            scope(exit) ilCheck!ilDeleteImages(1, &image);
+            ilCheck!ilBindImage(image);
+            ilCheck!ilLoadImage(file.toStringz());
             ilCheck!ilConvertImage(IL_RGBA, IL_UNSIGNED_BYTE);
 
-            pwidth = ilCheck!ilGetInteger(IL_IMAGE_WIDTH);
-            pheight = ilCheck!ilGetInteger(IL_IMAGE_HEIGHT);
-            ptextureWidth = powerOfTwo(pwidth);
-            ptextureHeight = powerOfTwo(pheight);
+            _width = ilCheck!ilGetInteger(IL_IMAGE_WIDTH);
+            _height = ilCheck!ilGetInteger(IL_IMAGE_HEIGHT);
+            _textureWidth = powerOfTwo(_width);
+            _textureHeight = powerOfTwo(_height);
 
             createTexture(ilCheck!ilGetData());
         }
@@ -53,10 +53,10 @@ final class Image{
             assert(asurface);
             scope(exit) SDL_FreeSurface(asurface);
 
-            pwidth = asurface.w;
-            pheight = asurface.h;
-            ptextureWidth = powerOfTwo(pwidth);
-            ptextureHeight = powerOfTwo(pheight);
+            _width = asurface.w;
+            _height = asurface.h;
+            _textureWidth = powerOfTwo(_width);
+            _textureHeight = powerOfTwo(_height);
 
             createTexture(asurface.pixels);
         }
@@ -64,51 +64,55 @@ final class Image{
         void bind()const in{
             assert(windowOpened);
         }body{
-            glBindTexture(GL_TEXTURE_2D, ptexture);
+            glBindTexture(GL_TEXTURE_2D, _texture);
         }
 
         FloatRect getTexCoords(const ref IntRect arect)const in{
-            assert(ptextureWidth > 0);
-            assert(ptextureHeight > 0);
+            assert(_textureWidth > 0);
+            assert(_textureHeight > 0);
         }body{
-            float lwidth = ptextureWidth;
-            float lheight = ptextureHeight;
+            float lwidth = _textureWidth;
+            float lheight = _textureHeight;
             return FloatRect(arect.left / lwidth, arect.top / lheight, arect.right / lwidth, arect.bottom / lheight);
         }
 
-        int width()const @property{
-            return pwidth;
+        const @property
+        int width(){
+            return _width;
         }
 
-        int height()const @property{
-            return pheight;
+        const @property
+        int height(){
+            return _height;
         }
 
-        int textureWidth()const @property{
-            return ptextureWidth;
+        const @property
+        int textureWidth(){
+            return _textureWidth;
         }
 
-        int textureHeight()const @property{
-            return ptextureHeight;
+        const @property
+        int textureHeight(){
+            return _textureHeight;
         }
     }
 
     private{
-        uint pwidth;
-        uint pheight;
-        uint ptextureWidth;
-        uint ptextureHeight;
-        uint ptexture;
+        uint _width;
+        uint _height;
+        uint _textureWidth;
+        uint _textureHeight;
+        uint _texture;
 
         void createTexture(in void* apixels)in{
             assert(windowOpened);
         }body{
-            glGenTextures(1, &ptexture);
+            glGenTextures(1, &_texture);
             bind();
             glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_LINEAR);
             glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_LINEAR);
-            glTexImage2D(GL_TEXTURE_2D, 0, GL_RGBA, ptextureWidth, ptextureHeight, 0, GL_RGBA, GL_UNSIGNED_BYTE, null);
-            glTexSubImage2D(GL_TEXTURE_2D, 0, 0, 0, pwidth, pheight, GL_RGBA, GL_UNSIGNED_BYTE, apixels);
+            glTexImage2D(GL_TEXTURE_2D, 0, GL_RGBA, _textureWidth, _textureHeight, 0, GL_RGBA, GL_UNSIGNED_BYTE, null);
+            glTexSubImage2D(GL_TEXTURE_2D, 0, 0, 0, _width, _height, GL_RGBA, GL_UNSIGNED_BYTE, apixels);
         }
     }
 
