@@ -21,7 +21,7 @@ void openWindow(int width, int height)in{
 }body{
 	enforce(!SDL_GL_SetAttribute(SDL_GL_DOUBLEBUFFER, true));
 
-    window = enforce(SDL_CreateWindow("Caption", SDL_WINDOWPOS_CENTERED, SDL_WINDOWPOS_CENTERED, width, height, SDL_WINDOW_OPENGL | SDL_WINDOW_SHOWN));
+    window = enforce(SDL_CreateWindow("", SDL_WINDOWPOS_CENTERED, SDL_WINDOWPOS_CENTERED, width, height, SDL_WINDOW_OPENGL | SDL_WINDOW_SHOWN));
     context = enforce(SDL_GL_CreateContext(window));
 
 	glCheck!glOrtho(0.0, width, height, 0.0, -1.0, 1.0);
@@ -32,6 +32,7 @@ void openWindow(int width, int height)in{
 	glCheck!glDisable(GL_DEPTH_TEST);
 
 	glCheck!glClear(GL_COLOR_BUFFER_BIT);
+    SDL_GL_SetSwapInterval(1);
     SDL_GL_SwapWindow(window);
 
     initInput();
@@ -74,8 +75,8 @@ void updateWindow(){
     SDL_GL_SwapWindow(window);
 }
 
-void setWindowTitle(string aname){
-    //SDL_WM_SetCaption(aname.toStringz, null);
+void setWindowTitle(string name){
+    SDL_SetWindowTitle(window, name.toStringz());
 }
 
 package:
