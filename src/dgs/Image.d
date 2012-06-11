@@ -62,7 +62,7 @@ final class Image{
         }
 
         void bind()const in{
-            assert(windowOpened);
+            assert(initialized);
         }body{
             glBindTexture(GL_TEXTURE_2D, _texture);
         }
@@ -105,7 +105,7 @@ final class Image{
         uint _texture;
 
         void createTexture(in void* apixels)in{
-            assert(windowOpened);
+            assert(initialized);
         }body{
             glGenTextures(1, &_texture);
             bind();
