@@ -5,7 +5,7 @@ import dgs.all;
 debug import std.stdio;
 
 void main(){
-    initDgs(640, 480);
+    initDgs(640, 480, true);
     scope(exit) destroyDgs();
 	setWindowTitle("dgs test");
 	mouseAliases[BUTTON_LEFT] = KEY_z;

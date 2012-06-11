@@ -17,7 +17,7 @@ public import dgs.Rect;
 public import dgs.Sprite;
 public import dgs.Window;
 
-void initDgs(int width, int height){
+void initDgs(int width, int height, bool vsync){
     chdir("lib");
     version(Posix){
         DerelictSDL2.load("./libSDL2.so");
@@ -29,8 +29,8 @@ void initDgs(int width, int height){
 	DerelictIL.load();
 	chdir("..");
 
-	assert(!SDL_Init(SDL_INIT_VIDEO | SDL_INIT_JOYSTICK | SDL_INIT_AUDIO));
-    assert(!TTF_Init());
+	enforce(!SDL_Init(SDL_INIT_VIDEO | SDL_INIT_JOYSTICK | SDL_INIT_AUDIO));
+    enforce(!TTF_Init());
     ilInit();
 
 	enforce(!SDL_GL_SetAttribute(SDL_GL_DOUBLEBUFFER, true));
@@ -45,7 +45,7 @@ void initDgs(int width, int height){
 	glCheck!glDisable(GL_DEPTH_TEST);
 
 	glCheck!glClear(GL_COLOR_BUFFER_BIT);
-    SDL_GL_SetSwapInterval(1);
+    SDL_GL_SetSwapInterval(vsync ? 1 : 0);
     SDL_GL_SwapWindow(window);
 
     initInput();
