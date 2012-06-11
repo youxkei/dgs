@@ -18,14 +18,17 @@ public import dgs.Window;
 
 void initDgs(){
     chdir("lib");
-	DerelictSDL2.load();
-	//DerelictSDLMixer.load();
-	DerelictSDL2ttf.load();
+    version(Posix){
+        DerelictSDL2.load("./libSDL2.so");
+        DerelictSDL2ttf.load("./libSDL2_ttf.so");
+    }else{
+        DerelictSDL2.load();
+        DerelictSDL2ttf.load();
+    }
 	DerelictIL.load();
 	chdir("..");
 
 	assert(!SDL_Init(SDL_INIT_VIDEO | SDL_INIT_JOYSTICK | SDL_INIT_AUDIO));
-    //assert(!Mix_OpenAudio(44100, AUDIO_S16, 2, 4096) );
     assert(!TTF_Init());
     ilInit();
 
