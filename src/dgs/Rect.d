@@ -7,29 +7,25 @@ struct Rect(T){
         T right;
         T bottom;
 
-        const typeof(this) flip(bool ax, bool ay){
+        const pure @safe nothrow 
+        Rect flip(bool x, bool y){
             return Rect(
-                ax ? pright : pleft,
-                ay ? pbottom : ptop,
-                ax ? pleft : pright,
-                ay ? ptop : pbottom
+                x ? right : left,
+                y ? bottom : top,
+                x ? left : right,
+                y ? top : bottom
             );
         }
 
-        const @property T width(){
-            return pright - pleft;
+        const pure @safe nothrow @property
+        T width(){
+            return right - left;
         }
 
-        const @property T height(){
-            return pbottom - ptop;
+        const pure @safe nothrow @property
+        T height(){
+            return bottom - top;
         }
-    }
-
-    private{
-        alias left pleft;
-        alias top ptop;
-        alias right pright;
-        alias bottom pbottom;
     }
 }
 

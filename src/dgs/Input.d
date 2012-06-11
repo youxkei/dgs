@@ -10,22 +10,26 @@ ubyte repeateDelay;
 ubyte repeateInterval;
 int threshold;
 
-bool isKeyRepeated(size_t akeycode){
-    enforce(akeycode < KEY_LAST);
-	return pkeyStates[akeycode].isRepeated;
+bool isKeyRepeated(size_t keycode)in{
+    assert(keycode < KEY_LAST);
+}body{
+	return keyStates[keycode].isRepeated;
 }
 
-bool isKeyPressed(size_t akeycode){
-    enforce(akeycode < KEY_LAST);
-	return pkeyStates[akeycode].isPressedByKey || pkeyStates[akeycode].isPressedByAllJoy || pkeyStates[akeycode].isPressedByAllAxis || pkeyStates[akeycode].isPressedByAllHat || pkeyStates[akeycode].isPressedByMouse;
+bool isKeyPressed(size_t keycode)in{
+    assert(keycode < KEY_LAST);
+}body{
+	return keyStates[keycode].isPressedByKey || keyStates[keycode].isPressedByAllJoy || keyStates[keycode].isPressedByAllAxis || keyStates[keycode].isPressedByAllHat || keyStates[keycode].isPressedByMouse;
 }
 
-bool isKeyTriggered(size_t akeycode){
-    enforce(akeycode < KEY_LAST);
-	return pkeyStates[akeycode].triggerState == 1;
+bool isKeyTriggered(size_t keycode)in{
+    assert(keycode < KEY_LAST);
+}body{
+    enforce(keycode < KEY_LAST);
+	return keyStates[keycode].triggerState == 1;
 }
 
-uint getKeyDir(){
+ubyte getKeyDir(){
 	if(isKeyPressed(KEY_UP) && isKeyPressed(KEY_LEFT)){
 		return 7;
 	}else if(isKeyPressed(KEY_UP) && isKeyPressed(KEY_RIGHT)){
@@ -303,212 +307,206 @@ enum{
 package:
 
 void initInput(){
-	prepeateDelay = 10;
-	prepeateInterval = 4;
-	pthreshold = 300;
-	for(int li; li < min(SDL_NumJoysticks(), 4); li++){
-		SDL_JoystickOpen(li);
+	repeateDelay = 10;
+	repeateInterval = 4;
+	threshold = 300;
+	foreach(i; 0..min(SDL_NumJoysticks(), 4)){
+		SDL_JoystickOpen(i);
 	}
-	pSDLKeyStates = SDL_GetKeyboardState(null);
+	SDLKeyStates = SDL_GetKeyboardState(null);
 }
 
 void updateKeyRepeat(){
-	for(size_t li; li < KEY_LAST; li++){
-		if(isKeyPressed(li)){
-		    if(pkeyStates[li].triggerState == 0){
-		        pkeyStates[li].triggerState = 1;
-		    }else if(pkeyStates[li].triggerState == 1){
-		        pkeyStates[li].triggerState = 2;
+	foreach(i; 0..KEY_LAST){
+		if(isKeyPressed(i)){
+		    if(keyStates[i].triggerState == 0){
+		        keyStates[i].triggerState = 1;
+		    }else if(keyStates[i].triggerState == 1){
+		        keyStates[i].triggerState = 2;
 		    }
 
-			if(pkeyStates[li].delayCount > 0) {
-				pkeyStates[li].delayCount--;
-				pkeyStates[li].isRepeated = false;
-			}else if(pkeyStates[li].intervalCount > 0){
-				pkeyStates[li].intervalCount--;
-				pkeyStates[li].isRepeated = false;
+			if(keyStates[i].delayCount > 0) {
+				keyStates[i].delayCount--;
+				keyStates[i].isRepeated = false;
+			}else if(keyStates[i].intervalCount > 0){
+				keyStates[i].intervalCount--;
+				keyStates[i].isRepeated = false;
 			}else{
-				pkeyStates[li].intervalCount = repeateInterval;
-				pkeyStates[li].isRepeated = true;
+				keyStates[i].intervalCount = repeateInterval;
+				keyStates[i].isRepeated = true;
 			}
 		}else{
-		    pkeyStates[li].triggerState = 0;
-			pkeyStates[li].isRepeated = false;
-			pkeyStates[li].delayCount = 0;
-			pkeyStates[li].intervalCount = 0;
+		    keyStates[i].triggerState = 0;
+			keyStates[i].isRepeated = false;
+			keyStates[i].delayCount = 0;
+			keyStates[i].intervalCount = 0;
 		}
 	}
 }
 
-void processInputEvent(const ref SDL_Event aevent){
-	switch(aevent.type){
+void processInputEvent(const ref SDL_Event event){
+	final switch(event.type){
 		case SDL_KEYDOWN://キーボードのキーが押された
-			pressByKey(aevent.key.keysym.sym);
+			pressByKey(event.key.keysym.sym);
 			break;
 		case SDL_KEYUP://キーボードのキーが開放された
-			releaseByKey(aevent.key.keysym.sym);
+			releaseByKey(event.key.keysym.sym);
 			break;
 		case SDL_JOYBUTTONDOWN://ゲームパッドのキーが押された
-			pressByJoy(aevent.jbutton.which, pjoyAliases[aevent.jbutton.button]);
+			pressByJoy(event.jbutton.which, joyAliases[event.jbutton.button]);
 			break;
 		case SDL_JOYBUTTONUP://ゲームパッドのキーが開放された。
-			releaseByJoy(aevent.jbutton.which, pjoyAliases[aevent.jbutton.button]);
+			releaseByJoy(event.jbutton.which, joyAliases[event.jbutton.button]);
 			break;
 		case SDL_JOYAXISMOTION://ゲームパッドのアナログスティックが動いた。
 		//X軸（正：右　負：左）
-			if(aevent.jaxis.axis == 0) {
-				if(aevent.jaxis.value < -pthreshold){
-					pressByAxis(aevent.jaxis.which, aevent.jaxis.axis, KEY_LEFT);
-				}else if(aevent.jaxis.value > pthreshold){
-					pressByAxis(aevent.jaxis.which, aevent.jaxis.axis, KEY_RIGHT);
+			if(event.jaxis.axis == 0) {
+				if(event.jaxis.value < -threshold){
+					pressByAxis(event.jaxis.which, event.jaxis.axis, KEY_LEFT);
+				}else if(event.jaxis.value > threshold){
+					pressByAxis(event.jaxis.which, event.jaxis.axis, KEY_RIGHT);
 				}else{
-					releaseByAxis(aevent.jaxis.which, aevent.jaxis.axis, KEY_LEFT);
-					releaseByAxis(aevent.jaxis.which, aevent.jaxis.axis, KEY_RIGHT);
+					releaseByAxis(event.jaxis.which, event.jaxis.axis, KEY_LEFT);
+					releaseByAxis(event.jaxis.which, event.jaxis.axis, KEY_RIGHT);
 				}
 			//Y軸（正：下　負：上）
-			}else if(aevent.jaxis.axis == 1){
-				if(aevent.jaxis.value > pthreshold){
-					pressByAxis(aevent.jaxis.which, aevent.jaxis.axis, KEY_DOWN);
-				}else if(aevent.jaxis.value < -pthreshold){
-					pressByAxis(aevent.jaxis.which, aevent.jaxis.axis, KEY_UP);
+			}else if(event.jaxis.axis == 1){
+				if(event.jaxis.value > threshold){
+					pressByAxis(event.jaxis.which, event.jaxis.axis, KEY_DOWN);
+				}else if(event.jaxis.value < -threshold){
+					pressByAxis(event.jaxis.which, event.jaxis.axis, KEY_UP);
 				}else{
-					releaseByAxis(aevent.jaxis.which, aevent.jaxis.axis, KEY_DOWN);
-					releaseByAxis(aevent.jaxis.which, aevent.jaxis.axis, KEY_UP);
+					releaseByAxis(event.jaxis.which, event.jaxis.axis, KEY_DOWN);
+					releaseByAxis(event.jaxis.which, event.jaxis.axis, KEY_UP);
 				}
 			}
 			break;
 		case SDL_JOYHATMOTION://ハットスイッチが動いた
-			if(aevent.jhat.value == SDL_HAT_CENTERED){
-				releaseByHat(aevent.jhat.which, aevent.jhat.hat, KEY_UP);
-				releaseByHat(aevent.jhat.which, aevent.jhat.hat, KEY_RIGHT);
-				releaseByHat(aevent.jhat.which, aevent.jhat.hat, KEY_DOWN);
-				releaseByHat(aevent.jhat.which, aevent.jhat.hat, KEY_LEFT);
+			if(event.jhat.value == SDL_HAT_CENTERED){
+				releaseByHat(event.jhat.which, event.jhat.hat, KEY_UP);
+				releaseByHat(event.jhat.which, event.jhat.hat, KEY_RIGHT);
+				releaseByHat(event.jhat.which, event.jhat.hat, KEY_DOWN);
+				releaseByHat(event.jhat.which, event.jhat.hat, KEY_LEFT);
 			}else{
-				if(aevent.jhat.value & SDL_HAT_UP){
-					pressByHat(aevent.jhat.which, aevent.jhat.hat, KEY_UP);
+				if(event.jhat.value & SDL_HAT_UP){
+					pressByHat(event.jhat.which, event.jhat.hat, KEY_UP);
 				}
-				if(aevent.jhat.value & SDL_HAT_RIGHT){
-					pressByHat(aevent.jhat.which, aevent.jhat.hat, KEY_RIGHT);
+				if(event.jhat.value & SDL_HAT_RIGHT){
+					pressByHat(event.jhat.which, event.jhat.hat, KEY_RIGHT);
 				}
-				if(aevent.jhat.value & SDL_HAT_DOWN){
-					pressByHat(aevent.jhat.which, aevent.jhat.hat, KEY_DOWN);
+				if(event.jhat.value & SDL_HAT_DOWN){
+					pressByHat(event.jhat.which, event.jhat.hat, KEY_DOWN);
 				}
-				if(aevent.jhat.value & SDL_HAT_LEFT){
-					pressByHat(aevent.jhat.which, aevent.jhat.hat, KEY_LEFT);
+				if(event.jhat.value & SDL_HAT_LEFT){
+					pressByHat(event.jhat.which, event.jhat.hat, KEY_LEFT);
 				}
 			}
 			break;
 		case SDL_MOUSEBUTTONDOWN:
-			pressByMouse(pmouseAliases[aevent.button.button]);
+			pressByMouse(mouseAliases[event.button.button]);
 			break;
 		case SDL_MOUSEBUTTONUP:
-			releaseByMouse(pmouseAliases[aevent.button.button]);
+			releaseByMouse(mouseAliases[event.button.button]);
 			break;
 		case SDL_MOUSEMOTION:
 			break;
-		default:
 	}
 }
 
 void clearKeyStates(){
-    pkeyStates[] = KeyState.init;
+    keyStates[] = KeyState.init;
 }
 
 
 private:
 
-KeyState[KEY_LAST] pkeyStates;
-ubyte* pSDLKeyStates;
-alias joyAliases pjoyAliases;
-alias mouseAliases pmouseAliases;
-alias repeateDelay prepeateDelay;
-alias repeateInterval prepeateInterval;
-alias threshold pthreshold;
+KeyState[KEY_LAST] keyStates;
+ubyte* SDLKeyStates;
 
-void press(size_t acode)in{
-	assert(acode < KEY_LAST);
+void press(size_t code)in{
+	assert(code < KEY_LAST);
 }body{
-	if(!isKeyPressed(acode)){
-	    pkeyStates[acode].triggerState = 1;
-		pkeyStates[acode].isRepeated = true;
-		pkeyStates[acode].delayCount = prepeateDelay;
+	if(!isKeyPressed(code)){
+	    keyStates[code].triggerState = 1;
+		keyStates[code].isRepeated = true;
+		keyStates[code].delayCount = repeateDelay;
 	}
 }
 
-void pressByKey(size_t acode)in{
-	assert(acode < KEY_LAST);
+void pressByKey(size_t code)in{
+	assert(code < KEY_LAST);
 }body{
-	press(acode);
-	pkeyStates[acode].isPressedByKey = true;
+	press(code);
+	keyStates[code].isPressedByKey = true;
 }
 
-void pressByJoy(size_t ajoy, size_t acode)in{
-	assert(ajoy <= 3);
-	assert(acode < KEY_LAST);
+void pressByJoy(size_t joy, size_t code)in{
+	assert(joy <= 3);
+	assert(code < KEY_LAST);
 }body{
-	press(acode);
-	pkeyStates[acode].isPressedByJoy[ajoy] = true;
+	press(code);
+	keyStates[code].isPressedByJoy[joy] = true;
 }
 
-void pressByAxis(size_t ajoy, size_t aaxis, size_t acode)in{
-	assert(ajoy <= 3);
-	assert(aaxis <= 1);
-	assert(acode >= 0);
-	assert(acode < KEY_LAST);
+void pressByAxis(size_t joy, size_t axis, size_t code)in{
+	assert(joy <= 3);
+	assert(axis <= 1);
+	assert(code >= 0);
+	assert(code < KEY_LAST);
 }body{
-	press(acode);
-	pkeyStates[acode].isPressedByAxis[ajoy][aaxis] = true;
+	press(code);
+	keyStates[code].isPressedByAxis[joy][axis] = true;
 }
 
-void pressByHat(size_t ajoy, size_t ahat, size_t acode)in{
-	assert(ajoy <= 3);
-	assert(ahat <= 1);
-	assert(acode < KEY_LAST);
+void pressByHat(size_t joy, size_t hat, size_t code)in{
+	assert(joy <= 3);
+	assert(hat <= 1);
+	assert(code < KEY_LAST);
 }body{
-	press(acode);
-	pkeyStates[acode].isPressedByHat[ajoy][ahat] = true;
+	press(code);
+	keyStates[code].isPressedByHat[joy][hat] = true;
 }
 
-void pressByMouse(size_t acode)in{
-	assert(acode < KEY_LAST);
+void pressByMouse(size_t code)in{
+	assert(code < KEY_LAST);
 }body{
-	press(acode);
-	pkeyStates[acode].isPressedByMouse = true;
+	press(code);
+	keyStates[code].isPressedByMouse = true;
 }
 
-void releaseByKey(size_t acode)in{
-	assert(acode < KEY_LAST);
+void releaseByKey(size_t code)in{
+	assert(code < KEY_LAST);
 }body{
-	pkeyStates[acode].isPressedByKey = false;
+	keyStates[code].isPressedByKey = false;
 }
 
-void releaseByJoy(size_t ajoy, size_t acode)in{
-	assert(ajoy <= 3);
-	assert(acode < KEY_LAST);
+void releaseByJoy(size_t joy, size_t code)in{
+	assert(joy <= 3);
+	assert(code < KEY_LAST);
 }body{
-	pkeyStates[acode].isPressedByJoy[ajoy] = false;
+	keyStates[code].isPressedByJoy[joy] = false;
 }
 
-void releaseByAxis(size_t ajoy, size_t aaxis, size_t acode)in{
-	assert(ajoy <= 3);
-	assert(aaxis <= 1);
-	assert(acode < KEY_LAST);
+void releaseByAxis(size_t joy, size_t axis, size_t code)in{
+	assert(joy <= 3);
+	assert(axis <= 1);
+	assert(code < KEY_LAST);
 }body{
-	pkeyStates[acode].isPressedByAxis[ajoy][aaxis] = false;
+	keyStates[code].isPressedByAxis[joy][axis] = false;
 }
 
-void releaseByHat(size_t ajoy, size_t ahat, size_t acode)in{
-	assert(ajoy <= 3);
-	assert(ahat <= 1);
-	assert(acode < KEY_LAST);
+void releaseByHat(size_t joy, size_t hat, size_t code)in{
+	assert(joy <= 3);
+	assert(hat <= 1);
+	assert(code < KEY_LAST);
 }body{
-	pkeyStates[acode].isPressedByHat[ajoy][ahat] = false;
+	keyStates[code].isPressedByHat[joy][hat] = false;
 }
 
-void releaseByMouse(size_t acode)in{
-	assert(acode < KEY_LAST);
+void releaseByMouse(size_t code)in{
+	assert(code < KEY_LAST);
 }body{
-	pkeyStates[acode].isPressedByMouse = false;
+	keyStates[code].isPressedByMouse = false;
 }
 
 struct KeyState{
@@ -526,38 +524,33 @@ struct KeyState{
 @property:
     bool isPressedByAllJoy() {
         return
-            pisPressedByJoy[0] ||
-            pisPressedByJoy[1] ||
-            pisPressedByJoy[2] ||
-            pisPressedByJoy[3];
+            isPressedByJoy[0] ||
+            isPressedByJoy[1] ||
+            isPressedByJoy[2] ||
+            isPressedByJoy[3];
     }
 
     bool isPressedByAllAxis() {
         return
-            pisPressedByAxis[0][0] ||
-            pisPressedByAxis[0][1] ||
-            pisPressedByAxis[1][0] ||
-            pisPressedByAxis[1][1] ||
-            pisPressedByAxis[2][0] ||
-            pisPressedByAxis[2][1] ||
-            pisPressedByAxis[3][0] ||
-            pisPressedByAxis[3][1];
+            isPressedByAxis[0][0] ||
+            isPressedByAxis[0][1] ||
+            isPressedByAxis[1][0] ||
+            isPressedByAxis[1][1] ||
+            isPressedByAxis[2][0] ||
+            isPressedByAxis[2][1] ||
+            isPressedByAxis[3][0] ||
+            isPressedByAxis[3][1];
     }
 
     bool isPressedByAllHat() {
         return
-            pisPressedByHat[0][0] ||
-            pisPressedByHat[0][1] ||
-            pisPressedByHat[1][0] ||
-            pisPressedByHat[1][1] ||
-            pisPressedByHat[2][0] ||
-            pisPressedByHat[2][1] ||
-            pisPressedByHat[3][0] ||
-            pisPressedByHat[3][1];
+            isPressedByHat[0][0] ||
+            isPressedByHat[0][1] ||
+            isPressedByHat[1][0] ||
+            isPressedByHat[1][1] ||
+            isPressedByHat[2][0] ||
+            isPressedByHat[2][1] ||
+            isPressedByHat[3][0] ||
+            isPressedByHat[3][1];
     }
-
-private:
-	alias isPressedByJoy pisPressedByJoy;
-	alias isPressedByAxis pisPressedByAxis;
-	alias isPressedByHat pisPressedByHat;
 }

@@ -24,56 +24,55 @@ mixin(defBoth!(__LINE__)("Sprite", q{
         IntRect subRect;
 
         invariant(){
-            assert(isFinite(px));
-            assert(isFinite(py));
-            assert(isFinite(pcenterX));
-            assert(isFinite(pcenterY));
-            assert(isFinite(pscaleX));
-            assert(isFinite(pscaleY));
-            assert(isFinite(protate));
-            assert(isFinite(palpha));
-            assert(palpha <= 1);
-            assert(palpha >= 0);
+            assert(isFinite(x));
+            assert(isFinite(y));
+            assert(isFinite(centerX));
+            assert(isFinite(centerY));
+            assert(isFinite(scaleX));
+            assert(isFinite(scaleY));
+            assert(isFinite(rotate));
+            assert(isFinite(alpha));
+            assert(alpha <= 1);
+            assert(alpha >= 0);
         }
 
         typeof(this) reset(){
-            px = 0;
-            py = 0;
-            pcenterX = 0;
-            pcenterY = 0;
-            pscaleX = 1;
-            pscaleY = 1;
-            protate = 1;
-            palpha = 1;
-            pvisible = true;
-            psubRect = IntRect.init;
-            pimage = null;
+            x = 0;
+            y = 0;
+            centerX = 0;
+            centerY = 0;
+            scaleX = 1;
+            scaleY = 1;
+            rotate = 1;
+            alpha = 1;
+            visible = true;
+            subRect = IntRect.init;
+            image = null;
             return this;
         }
 
         void draw(){
-            if(!pvisible){
+            if(!visible){
                 return;
             }
-            float lwidth = psubRect.width;
-            float lheight = psubRect.height;
-            if(pimage && pimage.width && pimage.height){
-                import std.stdio;
-                pimage.bind();
+            float width = subRect.width;
+            float height = subRect.height;
+            if(image && image.width && image.height){
+                image.bind();
                 glCheck!glPushMatrix();
                 glCheck!glTranslatef(0.375f, 0.375f, 0);
                 glCheck!glColor4f(1, 1, 1, alpha);
-                glCheck!glTranslatef(px + pcenterX, py + pcenterY, 0);
-                glCheck!glRotatef(protate, 0, 0, 1);
-                glCheck!glTranslatef(-pcenterX, -pcenterY, 0);
-                glCheck!glScalef(pscaleX, pscaleY, 1);
+                glCheck!glTranslatef(x + centerX, y + centerY, 0);
+                glCheck!glRotatef(rotate, 0, 0, 1);
+                glCheck!glTranslatef(-centerX, -centerY, 0);
+                glCheck!glScalef(scaleX, scaleY, 1);
 
-                FloatRect lrect = pimage.getTexCoords(psubRect).flip(pflipX, pflipY);
+                FloatRect rect = image.getTexCoords(subRect).flip(flipX, flipY);
                 glBegin(GL_QUADS);
-                    glTexCoord2f(lrect.left, lrect.top);        glVertex2f(0, 0);
-                    glTexCoord2f(lrect.left, lrect.bottom);     glVertex2f(0, lheight);
-                    glTexCoord2f(lrect.right, lrect.bottom);    glVertex2f(lwidth, lheight);
-                    glTexCoord2f(lrect.right, lrect.top);       glVertex2f(lwidth, 0);
+                    glTexCoord2f(rect.left, rect.top);        glVertex2f(0, 0);
+                    glTexCoord2f(rect.left, rect.bottom);     glVertex2f(0, height);
+                    glTexCoord2f(rect.right, rect.bottom);    glVertex2f(width, height);
+                    glTexCoord2f(rect.right, rect.top);       glVertex2f(width, 0);
                 glEnd();
 
                 glCheck!glPopMatrix();
@@ -101,31 +100,19 @@ mixin(defBoth!(__LINE__)("Sprite", q{
         }
 
         Image image()@property{
-            return pimage;
+            return _image;
         }
 
-        void image(Image aimage)@property{
-            if(!pimage && aimage.width > 0 && aimage.height > 0){
-                subRect = IntRect(0, 0, aimage.width, aimage.height);
+        void image(Image image)@property{
+            if(!_image && image.width > 0 && image.height > 0){
+                subRect = IntRect(0, 0, image.width, image.height);
             }
-            pimage = aimage;
+            _image = image;
         }
     }
 
     private{
-        alias x px;
-        alias y py;
-        alias centerX pcenterX;
-        alias centerY pcenterY;
-        alias scaleX pscaleX;
-        alias scaleY pscaleY;
-        alias flipX pflipX;
-        alias flipY pflipY;
-        alias rotate protate;
-        alias alpha palpha;
-        alias visible pvisible;
-        alias subRect psubRect;
-        Image pimage;
+        Image _image;
 
         template check(fields...){
             static assert(fields.length > 0);
