@@ -4,7 +4,7 @@ import derelict.devil.il;
 import derelict.sdl2.sdl;
 //import derelict.sdl.mixer;
 import derelict.sdl2.ttf;
-import org.opengl.gl;
+import derelict.opengl3.gl;
 
 import std.conv;
 import std.exception;
@@ -18,6 +18,8 @@ public import dgs.Sprite;
 public import dgs.Window;
 
 void initDgs(int width, int height, bool vsync){
+    DerelictGL.load();
+    //DerelictGL.reload();
     chdir("lib");
     version(Posix){
         DerelictSDL2.load("./libSDL2.so");
@@ -29,7 +31,9 @@ void initDgs(int width, int height, bool vsync){
 	DerelictIL.load();
 	chdir("..");
 
-	enforce(!SDL_Init(SDL_INIT_VIDEO | SDL_INIT_JOYSTICK | SDL_INIT_AUDIO));
+	enforce(!SDL_Init(SDL_INIT_VIDEO));
+    enforce(!SDL_InitSubSystem(SDL_INIT_JOYSTICK));
+    enforce(!SDL_InitSubSystem(SDL_INIT_AUDIO));
     enforce(!TTF_Init());
     ilInit();
 

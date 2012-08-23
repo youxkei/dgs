@@ -7,7 +7,7 @@ import derelict.sdl2.sdl;
 //import derelict.sdl2.mixer;
 import derelict.sdl2.ttf;
 import derelict.devil.il;
-import org.opengl.gl;
+import derelict.opengl3.gl;
 
 import std.conv;
 import std.exception;

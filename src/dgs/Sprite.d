@@ -3,7 +3,7 @@ module dgs.Sprite;
 import std.math;
 import std.traits;
 import std.typecons;
-import org.opengl.gl;
+import derelict.opengl3.gl;
 import dgs.Image;
 import dgs.Rect;
 import dgs.util;

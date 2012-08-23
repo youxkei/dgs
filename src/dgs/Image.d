@@ -2,7 +2,7 @@ module dgs.Image;
 
 import core.bitop;
 import derelict.devil.il;
-import org.opengl.gl;
+import derelict.opengl3.gl;
 import derelict.sdl2.sdl;
 import derelict.sdl2.ttf;
 import dgs.all;
