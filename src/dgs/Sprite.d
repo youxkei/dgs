@@ -60,7 +60,7 @@ mixin(defBoth!(__LINE__)("Sprite", q{
             if(image && image.width && image.height){
                 image.bind();
                 glCheck!glPushMatrix();
-                glCheck!glTranslatef(0.375f, 0.375f, 0);
+                //glCheck!glTranslatef(0.375f, 0.375f, 0);
                 glCheck!glColor4f(1, 1, 1, alpha);
                 glCheck!glTranslatef(x + centerX, y + centerY, 0);
                 glCheck!glRotatef(rotate, 0, 0, 1);
@@ -104,7 +104,7 @@ mixin(defBoth!(__LINE__)("Sprite", q{
         }
 
         void image(Image image)@property{
-            if(!_image && image.width > 0 && image.height > 0){
+            if(!_image && image && image.width > 0 && image.height > 0){
                 subRect = IntRect(0, 0, image.width, image.height);
             }
             _image = image;
