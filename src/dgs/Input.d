@@ -359,7 +359,7 @@ void processInputEvent(const ref SDL_Event event){
 			releaseByJoy(event.jbutton.which, joyAliases[event.jbutton.button]);
 			break;
 		case SDL_JOYAXISMOTION://ゲームパッドのアナログスティックが動いた。
-		//X軸（正：右　負：左）
+            //X軸
 			if(event.jaxis.axis == 0) {
 				if(event.jaxis.value < -threshold){
 					pressByAxis(event.jaxis.which, event.jaxis.axis, KEY_LEFT);
@@ -369,7 +369,7 @@ void processInputEvent(const ref SDL_Event event){
 					releaseByAxis(event.jaxis.which, event.jaxis.axis, KEY_LEFT);
 					releaseByAxis(event.jaxis.which, event.jaxis.axis, KEY_RIGHT);
 				}
-			//Y軸（正：下　負：上）
+			//Y軸
 			}else if(event.jaxis.axis == 1){
 				if(event.jaxis.value > threshold){
 					pressByAxis(event.jaxis.which, event.jaxis.axis, KEY_DOWN);
