@@ -8,7 +8,7 @@ void main(){
     initDgs(640, 480, true);
     scope(exit) destroyDgs();
     setWindowTitle("dgs test");
-    mouseAliases[BUTTON_LEFT] = KEY_z;
+    mouseAliases[SDL_BUTTON_LEFT] = SDL_SCANCODE_Z;
     auto sp = (new Sprite).field!("image", "centerX", "centerY").set(new Image("youkei.png"), 128, 128);
     auto sp2 = (new Sprite).field!"image".set(new Image("テキスト描写成功!!", 64));
     openWindow();
@@ -16,9 +16,9 @@ void main(){
         processEvents();
         clearWindow();
         sp.rotate += 2;
-        if(isKeyRepeated(KEY_DOWN)){
+        if(isKeyRepeated(SDL_SCANCODE_DOWN)){
             writeln("passed");
-        }else if(isKeyTriggered(KEY_z)){
+        }else if(isKeyTriggered(SDL_SCANCODE_Z)){
             writeln("z");
         }
         sp.draw();

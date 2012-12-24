@@ -6,6 +6,7 @@ import derelict.sdl2.sdl;
 import derelict.sdl2.ttf;
 import derelict.opengl3.gl;
 
+import std.stdio;
 import std.conv;
 import std.exception;
 import std.file;
@@ -21,9 +22,9 @@ void initDgs(int width, int height, bool vsync){
     DerelictGL.load();
     chdir("lib");
     version(Posix){
-        DerelictSDL2.load("./libSDL2.so");
-        DerelictSDL2ttf.load("./libSDL2_ttf.so");
-        DerelictIL.load("libIL.so,libIL.so.1");
+        DerelictSDL2.load();
+        DerelictSDL2ttf.load("libSDL2_ttf-2.0.so.0");
+        DerelictIL.load("libIL.so.1");
     }else{
         DerelictSDL2.load();
         DerelictSDL2ttf.load();
