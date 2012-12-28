@@ -1,14 +1,16 @@
 module dgs.Rect;
 
-struct Rect(T){
-    public{
+struct Rect(T)
+{
+    public
+    {
         T left;
         T top;
         T right;
         T bottom;
 
-        const pure @safe nothrow 
-        Rect flip(bool x, bool y){
+        Rect flip(bool x, bool y) const pure @safe nothrow
+        {
             return Rect(
                 x ? right : left,
                 y ? bottom : top,
@@ -17,13 +19,15 @@ struct Rect(T){
             );
         }
 
-        const pure @safe nothrow @property
-        T width(){
+        
+        T width() const pure @safe nothrow @property
+        {
             return right - left;
         }
 
-        const pure @safe nothrow @property
-        T height(){
+        
+        T height() const pure @safe nothrow @property
+        {
             return bottom - top;
         }
     }

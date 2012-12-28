@@ -11,26 +11,32 @@ import std.conv;
 import std.exception;
 import std.file;
 import std.traits;
-import dgs.util;
+public import dgs.util;
 public import dgs.Image;
 public import dgs.Input;
 public import dgs.Rect;
 public import dgs.Sprite;
 public import dgs.Window;
 
-void initDgs(int width, int height, bool vsync){
+void initDgs(string dir, int width, int height, bool vsync)
+{
     DerelictGL.load();
-    chdir("lib");
-    version(Posix){
+    immutable cwd = getcwd();
+    chdir(dir);
+    version(Posix)
+    {
         DerelictSDL2.load();
+//        DerelictSDL2ttf.load();
         DerelictSDL2ttf.load("libSDL2_ttf-2.0.so.0");
         DerelictIL.load("libIL.so.1");
-    }else{
+    }
+    else
+    {
         DerelictSDL2.load();
         DerelictSDL2ttf.load();
         DerelictIL.load();
     }
-    chdir("..");
+    chdir(cwd);
 
     enforce(!SDL_Init(SDL_INIT_VIDEO));
     enforce(!SDL_InitSubSystem(SDL_INIT_JOYSTICK));
@@ -58,7 +64,8 @@ void initDgs(int width, int height, bool vsync){
     initialized = true;
 }
 
-void destroyDgs(){
+void destroyDgs()
+{
     ilShutDown();
     TTF_Quit();
     //Mix_CloseAudio();
@@ -67,11 +74,14 @@ void destroyDgs(){
     initialized = false;
 }
 
-void processEvents(){
+void processEvents()
+{
     updateKeyRepeat();
     SDL_Event levent;
-    while(SDL_PollEvent(&levent)){
-        switch(levent.type){
+    while(SDL_PollEvent(&levent))
+    {
+        switch(levent.type)
+        {
             case SDL_KEYDOWN:
             case SDL_KEYUP:
             case SDL_JOYBUTTONDOWN:

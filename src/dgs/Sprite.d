@@ -8,41 +8,52 @@ import dgs.Image;
 import dgs.Rect;
 import dgs.util;
 
+
 mixin(defBoth!(__LINE__)("Sprite", q{
-    public{
+    invariant()
+    {
+        assert(isFinite(x));
+        assert(isFinite(y));
+        assert(isFinite(center.x));
+        assert(isFinite(center.y));
+        assert(isFinite(scale.x));
+        assert(isFinite(scale.y));
+        assert(isFinite(rotate));
+        assert(isFinite(alpha));
+        assert(alpha <= 1);
+        assert(alpha >= 0);
+    }
+
+    public
+    {
         float x = 0;
         float y = 0;
-        float centerX = 0;
-        float centerY = 0;
-        float scaleX = 1;
-        float scaleY = 1;
-        bool flipX;
-        bool flipY;
+        Center center;
+        Scale scale;
+        Flip flip;
         float rotate = 0;
         float alpha = 1;
         bool visible = true;
         IntRect subRect;
 
-        invariant(){
-            assert(isFinite(x));
-            assert(isFinite(y));
-            assert(isFinite(centerX));
-            assert(isFinite(centerY));
-            assert(isFinite(scaleX));
-            assert(isFinite(scaleY));
-            assert(isFinite(rotate));
-            assert(isFinite(alpha));
-            assert(alpha <= 1);
-            assert(alpha >= 0);
+        this(Args...)(Args args)
+        {
+            foreach(i, Arg; Args)
+            {
+                mixin(Arg.name ~ "=args[i].value;");
+            }
         }
 
-        typeof(this) reset(){
+        typeof(this) reset() @safe nothrow
+        {
             x = 0;
             y = 0;
-            centerX = 0;
-            centerY = 0;
-            scaleX = 1;
-            scaleY = 1;
+            center.x = 0;
+            center.y = 0;
+            scale.x = 1;
+            scale.y = 1;
+            flip.x = false;
+            flip.y = false;
             rotate = 1;
             alpha = 1;
             visible = true;
@@ -51,23 +62,25 @@ mixin(defBoth!(__LINE__)("Sprite", q{
             return this;
         }
 
-        void draw(){
-            if(!visible){
+        void draw() nothrow
+        {
+            if(!visible)
+            {
                 return;
             }
             float width = subRect.width;
             float height = subRect.height;
-            if(image && image.width && image.height){
+            if(image && image.width && image.height)
+            {
                 image.bind();
                 glCheck!glPushMatrix();
-                //glCheck!glTranslatef(0.375f, 0.375f, 0);
                 glCheck!glColor4f(1, 1, 1, alpha);
-                glCheck!glTranslatef(x + centerX, y + centerY, 0);
+                glCheck!glTranslatef(x + center.x, y + center.y, 0);
                 glCheck!glRotatef(rotate, 0, 0, 1);
-                glCheck!glTranslatef(-centerX, -centerY, 0);
-                glCheck!glScalef(scaleX, scaleY, 1);
+                glCheck!glScalef(scale.x, scale.y, 1);
+                glCheck!glTranslatef(-center.x, -center.y, 0);
 
-                FloatRect rect = image.getTexCoords(subRect).flip(flipX, flipY);
+                FloatRect rect = image.getTexCoords(subRect).flip(flip.x, flip.y);
                 glBegin(GL_QUADS);
                     glTexCoord2f(rect.left, rect.top);        glVertex2f(0, 0);
                     glTexCoord2f(rect.left, rect.bottom);     glVertex2f(0, height);
@@ -79,59 +92,42 @@ mixin(defBoth!(__LINE__)("Sprite", q{
             }
         }
 
-        template field(fields...){
-            static assert(fields.length > 0);
-            static assert(check!fields);
-
-            typeof(this) set(getTuple!fields.Types args){
-                foreach(i, field; fields){
-                    __traits(getMember, typeof(this), field) = args[i];
-                }
-                return this;
-            }
-
-            getTuple!fields get(){
-                typeof(return) res;
-                foreach(i, field; fields){
-                    res[i] = __traits(getMember, typeof(this), field);
-                }
-                return res;
-            }
+        inout(Image) image() inout @safe nothrow @property
+        {
+            return image_;
         }
 
-        Image image()@property{
-            return _image;
-        }
-
-        void image(Image image)@property{
-            if(!_image && image && image.width > 0 && image.height > 0){
+        void image(Image image) @safe nothrow @property
+        {
+            if(!image_ && image && image.width > 0 && image.height > 0)
+            {
                 subRect = IntRect(0, 0, image.width, image.height);
             }
-            _image = image;
+            image_ = image;
         }
     }
 
-    private{
-        Image _image;
-
-        template check(fields...){
-            static assert(fields.length > 0);
-            static if(fields.length == 1){
-                enum check = hasMember!(typeof(this), fields[0]);
-            }else{
-                enum check = hasMember!(typeof(this), fields[0]) && check!(fields[1..$]);
-            }
-        }
-
-        template getTuple(fields...){
-            static assert(fields.length > 0);
-            static if(fields.length == 1){
-                alias Tuple!(typeof(mixin(fields[0]))) getTuple;
-            }else{
-                alias Tuple!(typeof(mixin(fields[0])), getTuple!(fields[1..$]).Types) getTuple;
-            }
-        }
+    private
+    {
+        Image image_;
     }
 }));
 
 alias CSprite Sprite;
+
+private:
+
+struct Center
+{
+    float x = 0, y = 0;
+}
+
+struct Scale
+{
+    float x = 1, y = 1;
+}
+
+struct Flip
+{
+    bool x, y;
+}

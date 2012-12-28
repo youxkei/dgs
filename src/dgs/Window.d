@@ -16,22 +16,25 @@ import std.stdio;
 import std.string;
 import std.typecons;
 
-void openWindow()in{
-    assert(initialized);
-}body{
+void openWindow()
+{
+    enforce(initialized);
     SDL_ShowWindow(window);
 	windowOpened = true;
 }
 
-void clearWindow(){
+void clearWindow()
+{
 	glCheck!glClear(GL_COLOR_BUFFER_BIT);
 }
 
-void updateWindow(){
+void updateWindow()
+{
     SDL_GL_SwapWindow(window);
 }
 
-void setWindowTitle(string name){
+void setWindowTitle(string name)
+{
     SDL_SetWindowTitle(window, name.toStringz());
 }
 

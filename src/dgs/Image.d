@@ -14,15 +14,22 @@ import std.exception;
 import std.math;
 import std.string;
 
-final class Image{
-    public{
-        invariant(){
-            assert(initialized);
-        }
+final class Image
+{
+    invariant()
+    {
+        assert(initialized);
+    }
 
-        this(in string file)in{
+    public
+    {
+        this(in string file)
+        in
+        {
             assert(file);
-        }body{
+        }
+        body
+        {
             uint image = 0;
             ilCheck!ilGenImages(1, &image);
             scope(exit) ilCheck!ilDeleteImages(1, &image);
@@ -30,19 +37,23 @@ final class Image{
             ilCheck!ilLoadImage(file.toStringz());
             ilCheck!ilConvertImage(IL_RGBA, IL_UNSIGNED_BYTE);
 
-            _width = ilCheck!ilGetInteger(IL_IMAGE_WIDTH);
-            _height = ilCheck!ilGetInteger(IL_IMAGE_HEIGHT);
-            _textureWidth = powerOfTwo(_width);
-            _textureHeight = powerOfTwo(_height);
+            width_ = ilCheck!ilGetInteger(IL_IMAGE_WIDTH);
+            height_ = ilCheck!ilGetInteger(IL_IMAGE_HEIGHT);
+            textureWidth_ = powerOfTwo(width_);
+            textureHeight_ = powerOfTwo(height_);
 
             createTexture(ilCheck!ilGetData());
         }
 
-        this(in string str, in int size, in ubyte red = 255, in ubyte green = 255, in ubyte blue = 255)in{
+        this(in string str, in int size, in ubyte red = 255, in ubyte green = 255, in ubyte blue = 255)
+        in
+        {
             assert(str);
             assert(size >= 1);
             assert(size <= 127);
-        }body{
+        }
+        body
+        {
             if(!fonts[size]){
                 fonts[size] = TTF_OpenFont("font/umeplus-gothic.ttf", size);
                 assert(fonts[size]);
@@ -52,84 +63,105 @@ final class Image{
             assert(surface);
             scope(exit) SDL_FreeSurface(surface);
 
-            _width = surface.w;
-            _height = surface.h;
-            _textureWidth = powerOfTwo(_width);
-            _textureHeight = powerOfTwo(_height);
+            width_ = surface.w;
+            height_ = surface.h;
+            textureWidth_ = powerOfTwo(width_);
+            textureHeight_ = powerOfTwo(height_);
 
             createTexture(surface.pixels);
         }
 
-        const void bind(){
-            glBindTexture(GL_TEXTURE_2D, _texture);
+        void bind() const nothrow
+        {
+            glBindTexture(GL_TEXTURE_2D, texture_);
         }
 
-        const FloatRect getTexCoords(const ref IntRect arect)in{
-            assert(_textureWidth > 0);
-            assert(_textureHeight > 0);
-        }body{
-            float lwidth = _textureWidth;
-            float lheight = _textureHeight;
+        FloatRect getTexCoords(in IntRect arect) const @safe nothrow
+        in
+        {
+            assert(textureWidth_ > 0);
+            assert(textureHeight_ > 0);
+        }
+        body
+        {
+            float lwidth = textureWidth_;
+            float lheight = textureHeight_;
             return FloatRect(arect.left / lwidth, arect.top / lheight, arect.right / lwidth, arect.bottom / lheight);
         }
 
-        const pure @safe nothrow @property
-        int width(){
-            return _width;
+        
+        int width() const pure @safe nothrow @property
+        {
+            return width_;
         }
 
-        const pure @safe nothrow @property
-        int height(){
-            return _height;
+        
+        int height() const pure @safe nothrow @property
+        {
+            return height_;
         }
 
-        const pure @safe nothrow @property
-        int textureWidth(){
-            return _textureWidth;
+        
+        int textureWidth() const pure @safe nothrow @property
+        {
+            return textureWidth_;
         }
 
-        const pure @safe nothrow @property
-        int textureHeight(){
-            return _textureHeight;
+        
+        int textureHeight() const pure @safe nothrow @property
+        {
+            return textureHeight_;
         }
     }
 
-    private{
-        uint _width;
-        uint _height;
-        uint _textureWidth;
-        uint _textureHeight;
-        uint _texture;
+    private
+    {
+        uint width_;
+        uint height_;
+        uint textureWidth_;
+        uint textureHeight_;
+        uint texture_;
 
-        void createTexture(in void* pixels){
-            glGenTextures(1, &_texture);
+        void createTexture(in void* pixels)
+        {
+            glGenTextures(1, &texture_);
             bind();
             glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_LINEAR);
             glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_LINEAR);
-            glTexImage2D(GL_TEXTURE_2D, 0, GL_RGBA, _textureWidth, _textureHeight, 0, GL_RGBA, GL_UNSIGNED_BYTE, null);
-            glTexSubImage2D(GL_TEXTURE_2D, 0, 0, 0, _width, _height, GL_RGBA, GL_UNSIGNED_BYTE, pixels);
+            glTexImage2D(GL_TEXTURE_2D, 0, GL_RGBA, textureWidth_, textureHeight_, 0, GL_RGBA, GL_UNSIGNED_BYTE, null);
+            glTexSubImage2D(GL_TEXTURE_2D, 0, 0, 0, width_, height_, GL_RGBA, GL_UNSIGNED_BYTE, pixels);
         }
     }
 
-    private static{
+    private static
+    {
         TTF_Font*[128] fonts;
 
-        pure @trusted nothrow
-        int powerOfTwo(in int num)in{
+        
+        int powerOfTwo(in int num) pure @trusted nothrow
+        in{
             assert(num > 0);
-        }out(res){
+        }
+        out(res)
+        {
             assert(res > 0);
-        }body{
+        }
+        body
+        {
             auto left = bsf(num);
             auto right = bsr(num);
-            if(left == right){
+            if(left == right)
+            {
                 return num;
-            }else{
+            }
+            else
+            {
                 return 1 << (right + 1);
             }
         }
 
-        unittest{
+        unittest
+        {
             assert(powerOfTwo(5) == 8);
             assert(powerOfTwo(19) == 32);
             assert(powerOfTwo(64) == 64);
