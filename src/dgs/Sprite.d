@@ -62,7 +62,7 @@ mixin(defBoth!(__LINE__)("Sprite", q{
             return this;
         }
 
-        void draw() nothrow
+        void draw()
         {
             if(!visible)
             {

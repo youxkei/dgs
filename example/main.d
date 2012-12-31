@@ -5,7 +5,7 @@ import dgs.all;
 debug import std.stdio;
 
 void main(){
-    initDgs("lib", 640, 480, true);
+    initDgs("../lib", 640, 480, true);
     scope(exit) destroyDgs();
     setWindowTitle("dgs test");
     mouseAliases[SDL_BUTTON_LEFT] = SDL_SCANCODE_Z;

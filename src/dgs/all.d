@@ -2,7 +2,6 @@ module dgs.all;
 
 import derelict.devil.il;
 import derelict.sdl2.sdl;
-//import derelict.sdl.mixer;
 import derelict.sdl2.ttf;
 import derelict.opengl3.gl;
 
@@ -23,18 +22,34 @@ void initDgs(string dir, int width, int height, bool vsync)
     DerelictGL.load();
     immutable cwd = getcwd();
     chdir(dir);
-    version(Posix)
+    version(linux)
     {
-        DerelictSDL2.load();
-//        DerelictSDL2ttf.load();
-        DerelictSDL2ttf.load("libSDL2_ttf-2.0.so.0");
-        DerelictIL.load("libIL.so.1");
+        version(X86_64)
+        {
+            chdir("Linux64");
+        }
+        else version(X86)
+        {
+            chdir("Linux32");
+        }
+        else
+        {
+            static assert(false);
+        }
+        DerelictSDL2.load("./libSDL2.so");
+        DerelictSDL2ttf.load("./libSDL2_ttf.so");
+        DerelictIL.load("./libIL.so");
+    }
+    else version(Windows)
+    {
+        chdir("Windows");
+        DerelictSDL2.load("./SDL2.dll");
+        DerelictSDL2ttf.load("./SDL2_ttf.dll");
+        DerelictIL.load("./DevIL.dll");
     }
     else
     {
-        DerelictSDL2.load();
-        DerelictSDL2ttf.load();
-        DerelictIL.load();
+        static assert(false);
     }
     chdir(cwd);
 
@@ -68,7 +83,6 @@ void destroyDgs()
 {
     ilShutDown();
     TTF_Quit();
-    //Mix_CloseAudio();
     SDL_Quit();
 
     initialized = false;
