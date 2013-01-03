@@ -11,7 +11,7 @@ struct NamedValue(string n, T)
     T value;
 }
 
-NamedValue!(name, T) n(string name, T)(T arg)
+NamedValue!(name, T) n(string name, T)(T arg) @property
 {
     return NamedValue!(name, T)(arg);
 }

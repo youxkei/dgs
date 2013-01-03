@@ -9,8 +9,16 @@ void main(){
     scope(exit) destroyDgs();
     setWindowTitle("dgs test");
     mouseAliases[SDL_BUTTON_LEFT] = SDL_SCANCODE_Z;
-    auto sp = new Sprite((new Image("youkei.png")).n!"image", 64.n!"center.x", 64.n!"center.y");
-    auto sp2 = new Sprite((new Image("テキスト描写成功!!", 64)).n!"image");
+    auto sp = new Sprite
+    (
+        n!"image"(new Image("youkei.png")),
+        n!"center.x"(64),
+        n!"center.y"(64)
+    );
+    auto sp2 = new Sprite
+    (
+        n!"image"(new Image("テキスト描写成功!!", 64))
+    );
     openWindow();
     while(true){
         processEvents();
