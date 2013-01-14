@@ -1,26 +1,68 @@
 module dgs.util;
 
 import std.conv;
+import std.metastrings;
 import std.traits;
 import derelict.devil.il;
 import derelict.opengl3.gl;
 
-struct NamedValue(string n, T)
+struct NamedValue(string n, int line_, string file_, T)
 {
     enum name = n;
+    enum line = line_;
+    enum file = file_;
     T value;
 }
 
-NamedValue!(name, T) n(string name, T)(T arg) @property
+NamedValue!(name, line, file, T) n(string name, int line = __LINE__, string file = __FILE__, T)(T arg) @property
 {
-    return NamedValue!(name, T)(arg);
+    return typeof(return)(arg);
 }
 
-package:
-
-mixin template ctor(members...)
+mixin template ctor()
 {
-    mixin(make(members));
+    this(Args...)(Args args)
+    {
+        foreach(arg; args)
+        {
+            static if(__traits(compiles, mixin(arg.name)))
+            {
+                static if(__traits(compiles, mixin(arg.name ~ "=arg.value")))
+                {
+                    mixin(arg.name ~ "=arg.value;");
+                }
+                else
+                {
+                    pragma(msg, arg.file ~ "(" ~ toStringNow!(arg.line) ~ "): Error: cannot assign " ~ typeof(arg.value).stringof ~ " value to " ~ arg.name);
+                    static assert(false);
+                }
+            }
+            else
+            {
+                pragma(msg, arg.file ~ "(" ~ toStringNow!(arg.line) ~ "): Error: " ~ arg.name ~ " not found");
+                static assert(false);
+            }
+        }
+    }
+}
+
+unittest
+{
+    static struct Hoge
+    {
+        int member1;
+        string member2;
+        mixin ctor;
+    }
+
+    
+    auto hoge = Hoge(
+        n!"member1"(3141592),
+        n!"member2"("pi")
+    );
+
+    assert(hoge.member1 == 3141592);
+    assert(hoge.member2 == "pi");
 }
 
 string defBoth(int line = __LINE__)(string name, string src)
@@ -60,6 +102,8 @@ unittest
         assert(e.line == __LINE__ - 23);
     }
 }
+
+package:
 
 debug
 {
@@ -244,33 +288,4 @@ else
     {
         alias Func ilCheck;
     }
-}
-
-private:
-
-string make(T...)(T members)
-{
-    string dec;
-    string def;
-    foreach(i, member; members)
-    {
-        if(i)
-        {
-            dec ~= ",";
-        }
-        dec ~= "typeof("~member~") a"~member;
-        def ~= member~"=a"~member~";";
-    }
-    return "this("~dec~"){"~def~"}";
-}
-
-unittest
-{
-    enum dg =
-    {
-        assert(make("a", "b") == q{this(typeof(a) aa,typeof(b) ab){a=aa;b=ab;}});
-        return true;
-    };
-    static assert(dg());
-    dg();
 }

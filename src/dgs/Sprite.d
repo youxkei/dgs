@@ -36,13 +36,7 @@ mixin(defBoth!(__LINE__)("Sprite", q{
         bool visible = true;
         IntRect subRect;
 
-        this(Args...)(Args args)
-        {
-            foreach(i, Arg; Args)
-            {
-                mixin(Arg.name ~ "=args[i].value;");
-            }
-        }
+        mixin ctor;
 
         typeof(this) reset() @safe nothrow
         {
