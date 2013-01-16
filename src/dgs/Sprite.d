@@ -8,8 +8,8 @@ import dgs.Image;
 import dgs.Rect;
 import dgs.util;
 
-
-mixin(defBoth!(__LINE__)("Sprite", q{
+class Sprite
+{
     invariant()
     {
         assert(isFinite(x));
@@ -69,7 +69,7 @@ mixin(defBoth!(__LINE__)("Sprite", q{
                 image.bind();
                 glCheck!glPushMatrix();
                 glCheck!glColor4f(1, 1, 1, alpha);
-                glCheck!glTranslatef(x + center.x, y + center.y, 0);
+                glCheck!glTranslatef(x, y, 0);
                 glCheck!glRotatef(rotate, 0, 0, 1);
                 glCheck!glScalef(scale.x, scale.y, 1);
                 glCheck!glTranslatef(-center.x, -center.y, 0);
@@ -86,7 +86,7 @@ mixin(defBoth!(__LINE__)("Sprite", q{
             }
         }
 
-        inout(Image) image() inout @safe nothrow @property
+        const(Image) image() const pure @safe nothrow @property
         {
             return image_;
         }
@@ -105,9 +105,7 @@ mixin(defBoth!(__LINE__)("Sprite", q{
     {
         Image image_;
     }
-}));
-
-alias CSprite Sprite;
+}
 
 private:
 

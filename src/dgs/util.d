@@ -52,6 +52,7 @@ unittest
     {
         int member1;
         string member2;
+
         mixin ctor;
     }
 
@@ -63,44 +64,6 @@ unittest
 
     assert(hoge.member1 == 3141592);
     assert(hoge.member2 == "pi");
-}
-
-string defBoth(int line = __LINE__)(string name, string src)
-{
-    return "struct S" ~ name ~ "{" ~ src ~ "}\n #line " ~ to!string(line) ~ "\n final class C" ~ name ~ "{" ~ src ~ "}";
-}
-
-unittest
-{
-    mixin(defBoth("Vector", q{
-        int x;
-        int y;
-        void f(){
-            throw new Exception("");
-        }
-    }));
-
-    CVector cv = new CVector();
-    try
-    {
-        cv.f();
-    }
-    catch(Exception e)
-    {
-        assert(e.file == __FILE__);
-        assert(e.line == __LINE__ - 12);
-    }
-
-    SVector sv;
-    try
-    {
-        sv.f();
-    }
-    catch(Exception e)
-    {
-        assert(e.file == __FILE__);
-        assert(e.line == __LINE__ - 23);
-    }
 }
 
 package:

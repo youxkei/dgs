@@ -12,6 +12,8 @@ void main(){
     auto sp = new Sprite
     (
         n!"image"(new Image("youkei.png")),
+        n!"x"(128),
+        n!"y"(128),
         n!"center.x"(64),
         n!"center.y"(64)
     );
