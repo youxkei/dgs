@@ -38,7 +38,7 @@ class Sprite
 
         mixin ctor;
 
-        typeof(this) reset() @safe nothrow
+        void reset() @safe nothrow
         {
             x = 0;
             y = 0;
@@ -53,7 +53,6 @@ class Sprite
             visible = true;
             subRect = IntRect.init;
             image = null;
-            return this;
         }
 
         void draw()
@@ -86,7 +85,7 @@ class Sprite
             }
         }
 
-        const(Image) image() const pure @safe nothrow @property
+        Image image() pure @safe nothrow @property
         {
             return image_;
         }
